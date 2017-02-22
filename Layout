@@ -1,0 +1,13 @@
+Open socket for listening		s
+accept with ALice			A s
+recieve Alice Info and Friends		A s
+Disconnect with Alice			A s
+connect with Bob			B s
+Recieve Bobs info and Friends		B s
+Send Bob's Friend's Info to Bob		B s
+disconnect Bob and server		B s
+Set Alice to listen for BOB		A
+Bob connect to Alice			A B
+Bob Sends Message			A B
+Alice sends message			A B
+
