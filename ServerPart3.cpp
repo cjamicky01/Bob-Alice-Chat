@@ -163,17 +163,7 @@ cout << "AliceInfo: ";
 cout << "BobInfo: ";
 		cout << BobInfo << endl;
 		}*/
-	
-
-
-	//close(first_socket);
-	//close(second_socket);
-	child_pid = fork();
-	if (child_pid == 0) {
-		child_pid = getpid();
-		while (1) {
-
-			listen_status = listen(first_socket, MY_UNSERVED);
+	listen_status = listen(first_socket, MY_UNSERVED);
 			if (listen_status < 0) {
 				perror("error on listen for third socket:");
 				exit(1);
@@ -187,6 +177,16 @@ cout << "BobInfo: ";
 			}
 			cout << "I accepted a connection from " <<
 				inet_ntoa(client_addr.sin_addr) << endl;
+
+
+	//close(first_socket);
+	//close(second_socket);
+	child_pid = fork();
+	if (child_pid == 0) {
+		child_pid = getpid();
+		while (1) {
+
+			
 			/*
 			//Bind for new connection
 			third_socket = socket(AF_INET,SOCK_STREAM,0);
@@ -231,11 +231,11 @@ cout << "BobInfo: ";
 
 
 			cout << "Waiting For Bob's Response..." << endl;
-			while ((rcv_count = recv(fourth_socket, temp, SIZE, flags)) <= 0);
+			while ((rcv_count = recv(first_socket, temp, SIZE, flags)) <= 0);
 			rcv_count = 0;
 			strcpy(BobInfo, temp);
 			cout << "Message 1 Bob: " << temp << endl;
-			while ((rcv_count = recv(fourth_socket, temp, SIZE, flags)) <= 0);
+			while ((rcv_count = recv(first_socket, temp, SIZE, flags)) <= 0);
 			rcv_count = 0;
 			strcpy(BobFriends, temp);
 			cout << "Message 2 Bob: " << temp << endl;
@@ -249,7 +249,7 @@ cout << "BobInfo: ";
 		//cout << "Friends: " << friends << endl;
 		//space = "test";
 			cout << "Waiting for yes/no response..." << endl;
-			while ((rcv_count = recv(fourth_socket, temp, SIZE, flags)) <= 0);
+			while ((rcv_count = recv(first_socket, temp, SIZE, flags)) <= 0);
 			rcv_count = 0;
 			cout << "Response: " << temp << endl;
 			int send_status;
@@ -257,7 +257,7 @@ cout << "BobInfo: ";
 			//cin >> space;
 			//string check = temp;
 			//if((strcmp(temp, "yes")==0) ){
-			send_status = send(fourth_socket, AliceInfo, strlen(AliceInfo) + 2, flags);
+			send_status = send(first_socket, AliceInfo, strlen(AliceInfo) + 2, flags);
 			if (send_status < 0) {
 				perror("error on send\n");
 				exit(1);
