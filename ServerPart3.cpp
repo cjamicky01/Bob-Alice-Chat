@@ -84,10 +84,10 @@ int main() {
 	where family is always PF_INET, type is SOCK_STREAM for connected link,
 	0 lets the system choose the underlying ipc protocol
 	***************************************************************************/
-	char hostname[50];															//Make a space for the hostname
+	char hostname[50];							//Make a space for the hostname
 	struct hostent *entry;
-	if (gethostname(hostname, sizeof(hostname)) == 0)							//This gets the host name and IP and outputs them both
-	{																			//	Along with setting some information for the socket 
+	if (gethostname(hostname, sizeof(hostname)) == 0)			//This gets the host name and IP and outputs them both
+{										//	Along with setting some information for the socket 
 		printf("Hostname =%s\n", hostname);
 		if ((entry = gethostbyname(hostname)) != NULL)
 		{
@@ -130,7 +130,7 @@ int main() {
 			exit(1);
 		}
 		cout << "I accepted a connection from " <<								//Print where the connection was recieved from
-			inet_ntoa(serv_addr.sin_addr) << endl;
+			inet_ntoa(client_addr.sin_addr) << endl;
 
 
 	/***************************************************************************
@@ -144,7 +144,7 @@ int main() {
 	rcv_count = 0;																//Reset count
 	strcpy(AliceInfo, temp);													//Copy message into AliceInfo
 	cout << "Message 1 Alice: " << temp << endl;								//Output message for verification on server side
-
+	
 	while ((rcv_count = recv(second_socket, temp2, SIZE, flags)) <= 0);			//Recieve AliceFriends
 	rcv_count = 0;																//Reset Count
 	strcpy(AliceFriends, temp2);												//Copy message into Alice Friends
@@ -152,7 +152,8 @@ int main() {
 
 	listen_status = -1;															//Reset listening and socket statuses
 	second_socket = -1;
-
+cout<<"Listening"<<endl;
+usleep(4000);
 	listen_status = listen(first_socket, MY_UNSERVED);							//Start listening on Socket for second connection, Bob
 	if (listen_status < 0) {													//Check for errors when listening
 		perror("error on listen for third socket:");
@@ -168,11 +169,7 @@ int main() {
 	cout << "I accepted a connection from " <<									//Print where the connection was recieved from
 		inet_ntoa(client_addr.sin_addr) << endl;
 
-	send_status = send(second_socket, AliceInfo, strlen(AliceInfo) + 2, flags);	//Send Alice's info to Bob
-	if (send_status < 0) {														//Check for errors
-		perror("error on send\n");
-		exit(1);
-	}
+	
 
 	cout << "Waiting For Bob's Response..." << endl;							//Wait for Bob
 	while ((rcv_count = recv(second_socket, temp, SIZE, flags)) <= 0);			//Recieve Bob's information
@@ -190,6 +187,12 @@ int main() {
 	while ((rcv_count = recv(second_socket, temp, SIZE, flags)) <= 0);			//Recieve response
 	rcv_count = 0;																//Reset Count
 	cout << "Response: " << temp << endl;										//Ouput response for verification on server side
+send_status = send(second_socket, AliceInfo, strlen(AliceInfo) + 2, flags);	//Send Alice's info to Bob
+	if (send_status < 0) {														//Check for errors
+		perror("error on send\n");
+		exit(1);
+	}
 
 	return 0;
+}
 }

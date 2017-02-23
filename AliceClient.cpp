@@ -147,7 +147,7 @@ int main(int argc, char * argv[]) {
 		exit(1);
 	}
 
-	//usleep(SLEEP_TIME);														//Sleep (Might not be necessary)
+	usleep(SLEEP_TIME);														//Sleep (Might not be necessary)
 
 	send_status = send(first_socket, buf2, strlen(buf2) + 2, flags);			//Send Alice's Friends to the server
 	if (send_status < 0) {														//Check for errors sending
@@ -169,11 +169,10 @@ int main(int argc, char * argv[]) {
 	again for the new socket.
 	***************************************************************************/
 	string waitresponse;
-	cout << "Are you Ready to Reviece Messages?";
-	cin >> waitresponse;														//This is to allow the user to declare when they are ready
-	if (waitresponse == "no") {													//Exit if they say no
-		return 0;
-	}
+	cout << "Are you Ready to Reviece Messages? (yes/no)" << endl;
+	cin >> waitresponse;		
+	usleep(SLEEP_TIME);												//This is to allow the user to declare when they are ready
+
 	cout << "Setting Up Listening server." << endl;								//Alert user that Listening is starting
 
 	third_socket = socket(AF_INET, SOCK_STREAM, 0);								//Create the Socket

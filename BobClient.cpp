@@ -148,19 +148,17 @@ int main(int argc, char * argv[]) {
 		perror("error on send 1\n");
 		exit(1);
 	}
-	
+	usleep(SLEEP_TIME);
 	send_status = send(first_socket, buf2, strlen(buf2) + 2, flags);				//Send Bob's Friends to the server
 	if (send_status < 0) {														//Check for errors sending
 		perror("error on send\n");
 		exit(1);
 	}
-
+	usleep(SLEEP_TIME);
 	cout << "Would you like to see your friends? (yes/no)" << endl;				//Ask if they want to see their friends
 	cin >> space;																//Pull user input
-	if (space == "no") {														//If no exit the program
-		return 0;
-	}
 
+	usleep(SLEEP_TIME);
 	send_status = send(first_socket, space, strlen(space) + 2, flags);			//Send the user input to the server
 	if (send_status < 0) {														//Check for errors sending		
 		perror("error on send\n");
