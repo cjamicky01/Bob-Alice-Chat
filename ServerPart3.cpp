@@ -1,4 +1,10 @@
-// server.cpp -- server
+/*******************************************************************************
+Name: Connor Jamicky
+Date:2/23/2017
+File: ServerPart3
+Project: A chat between two parties using a server for connection information
+and sockets as the method of communication
+*******************************************************************************/
 using namespace std;
 #include <iostream>
 #include <sys/socket.h> // socket header files
@@ -20,10 +26,10 @@ using namespace std;
 /*
 internet socket address structure
 struct sockaddr_in {
-   short int           sin_family;
-   unsigned short int  sin_port;
-   struct in_addr      sin_addr;
-   unsigned char       sin_zero[8];
+short int           sin_family;
+unsigned short int  sin_port;
+struct in_addr      sin_addr;
+unsigned char       sin_zero[8];
 }
 
 port and address need to be in network byte order
@@ -38,6 +44,10 @@ inet_ntoa() ip number to network address converter
 
 
 int main() {
+	/***************************************************************************
+	This Section is declaring all the variables that will be needed in most
+	of the program.
+	***************************************************************************/
 	struct sockaddr_in first_addr, client_addr, third_addr;
 	char BobInfo[SIZE];
 	char AliceInfo[SIZE];
@@ -64,20 +74,20 @@ int main() {
 	int portNum;
 	string friends;
 	char * pch;
-	//unsigned char space[SIZE];
-	//unsigned char space2[SIZE];
-
-
+	int send_status = 0;
 	char *SERVICE_ADDR_STR = "";
-	/* args are socket(address family, type, protocol)
-	   where family is always AF_INET, type is SOCK_STREAM for connected link,
-	   0 lets the system choose the underlying ipc protocol
-	*/
-	//find out the hostname and IP address 
-	char hostname[50];
+
+	/***************************************************************************
+	This Section is gathering host information and setting some socket settings
+	and waiting for a connection from Alice.
+	args are socket(address family, type, protocol)
+	where family is always PF_INET, type is SOCK_STREAM for connected link,
+	0 lets the system choose the underlying ipc protocol
+	***************************************************************************/
+	char hostname[50];															//Make a space for the hostname
 	struct hostent *entry;
-	if (gethostname(hostname, sizeof(hostname)) == 0)
-	{
+	if (gethostname(hostname, sizeof(hostname)) == 0)							//This gets the host name and IP and outputs them both
+	{																			//	Along with setting some information for the socket 
 		printf("Hostname =%s\n", hostname);
 		if ((entry = gethostbyname(hostname)) != NULL)
 		{
@@ -87,193 +97,99 @@ int main() {
 		}
 	}
 
-	// create a socket
-	first_socket = socket(AF_INET, SOCK_STREAM, 0);
-
-	if (first_socket < 0) {
+	first_socket = socket(AF_INET, SOCK_STREAM, 0);								//Create the socket
+	if (first_socket < 0) {														//Check for errors when opening the socket
 		perror("error opening the first socket:");
 		exit(1);
 	}
-	// bind it to a port and advertise it
-	// type is inet, port is my personal number, ANY means use my current ip number
-	first_addr.sin_family = AF_INET;
+																				//Bind The socket to a port and Advertise it
+	first_addr.sin_family = AF_INET;											//Type is INET, port is the port entered previously, ANY means use my current IP number
 	first_addr.sin_port = MY_PORT;
 	first_addr.sin_addr.s_addr = INADDR_ANY;
-	bind_status = bind(first_socket, (struct sockaddr *) & first_addr,
+	bind_status = bind(first_socket, (struct sockaddr *) & first_addr,	//Try to connect to the server
 		sizeof(struct sockaddr_in));
-	if (bind_status < 0) {
+	if (connect_status < 0) {													//Check for errors when connecting
 		perror("error on binding first_socket:");
 		exit(1);
 	}
 
-	// inform the system how many unserved connections are allowed
-	listen_status = listen(first_socket, MY_UNSERVED);
-	if (listen_status < 0) {
-		perror("error on listen for fist socket:");
+	listen_status = listen(first_socket, MY_UNSERVED);							//Set socket to listen
+	if (listen_status < 0) {													//heck for errors when listening
+		perror("error on listen for first socket:");
 		exit(1);
 	}
 	client_addr_len = sizeof(client_addr);
-	// wait and accept connections
-	cout << "Waiting for connections" << endl;
-	//while (1) {
-	memset(&client_addr, 0, sizeof(client_addr));
-	second_socket = accept(first_socket, (struct sockaddr *)&client_addr,
-		&client_addr_len);
-	if (second_socket < 0) {
-		perror("error on accept on first socket:");
+
+	cout << "Waiting for connections" << endl;									//Tell user we are just waiting for the other to connect
+	while (1) {
+		memset(&client_addr, 0, sizeof(client_addr));
+		second_socket = accept(first_socket, (struct sockaddr *)&client_addr,	//Accept the user trying to connect		
+			&client_addr_len);
+		if (second_socket < 0) {												//Check for errors in accepting the new socket
+			perror("error on accept on first socket:");
+			exit(1);
+		}
+		cout << "I accepted a connection from " <<								//Print where the connection was recieved from
+			inet_ntoa(serv_addr.sin_addr) << endl;
+
+
+	/***************************************************************************
+	This Section is recieveing information first from Alice, then from Bob and 
+	replying to Bob with Alice's information
+	***************************************************************************/
+	flags = 0;																	//Set the flags for recieving information
+
+
+	while ((rcv_count = recv(second_socket, temp, SIZE, flags)) <= 0);			//Recieve AliceInfo
+	rcv_count = 0;																//Reset count
+	strcpy(AliceInfo, temp);													//Copy message into AliceInfo
+	cout << "Message 1 Alice: " << temp << endl;								//Output message for verification on server side
+
+	while ((rcv_count = recv(second_socket, temp2, SIZE, flags)) <= 0);			//Recieve AliceFriends
+	rcv_count = 0;																//Reset Count
+	strcpy(AliceFriends, temp2);												//Copy message into Alice Friends
+	cout << "Message 2 Alice: " << temp2 << endl;								//Output message for verification on server side
+
+	listen_status = -1;															//Reset listening and socket statuses
+	second_socket = -1;
+
+	listen_status = listen(first_socket, MY_UNSERVED);							//Start listening on Socket for second connection, Bob
+	if (listen_status < 0) {													//Check for errors when listening
+		perror("error on listen for third socket:");
 		exit(1);
 	}
-	cout << "I accepted a connection from " <<
+	memset(&client_addr, 0, sizeof(client_addr));								
+	second_socket = accept(first_socket, (struct sockaddr *)&client_addr,		//Accept the user trying to connect
+		&client_addr_len);
+	if (second_socket < 0) {													//Check for errors
+		perror("error on accept on second socket:");
+		exit(1);
+	}
+	cout << "I accepted a connection from " <<									//Print where the connection was recieved from
 		inet_ntoa(client_addr.sin_addr) << endl;
 
-	//child_pid = fork(); // fork out process to receive data from new socket
-	//if (child_pid==0) {
-	   //child_pid = getpid();
-	flags = 0;
-
-	// receive buffer
-	while ((rcv_count = recv(second_socket, temp, SIZE, flags)) <= 0); //Recieve AliceInfo
-	rcv_count = 0;
-	strcpy(AliceInfo, temp);
-	//usleep(400000);
-	cout << "Message 1 Alice: " << temp << endl;
-	//strcpy(temp3, temp);
-	//usleep(400000);
-	while ((rcv_count = recv(second_socket, temp2, SIZE, flags)) <= 0); //Recieve AliceFriends
-	rcv_count = 0;
-	strcpy(AliceFriends, temp2);
-	//usleep(400000);
-	cout << "Message 2 Alice: " << temp2 << endl;
-	//usleep(400000);
-		/*pch = strtok(temp, " ");
-	cout << "PCH: " << pch << endl;
-	if(strcmp(pch, "Bob")==0){
-	strcpy(BobInfo, temp3);
-	strcpy(BobFriends, temp2);
-cout << "AliceInfo: ";
-		cout << AliceInfo << endl;
-		cout << "BobInfo: ";
-		cout << BobInfo << endl;
-		}
-		if(strcmp(pch, "Alice")==0) {
-		strcpy(AliceInfo, temp3);
-		strcpy(AliceFriends, temp2);
-		cout << "AliceInfo: ";
-		cout << AliceInfo << endl;
-cout << "BobInfo: ";
-		cout << BobInfo << endl;
-		}*/
-	listen_status = listen(first_socket, MY_UNSERVED);
-			if (listen_status < 0) {
-				perror("error on listen for third socket:");
-				exit(1);
-			}
-			memset(&client_addr, 0, sizeof(client_addr));
-			second_socket = accept(first_socket, (struct sockaddr *)&client_addr,
-				&client_addr_len);
-			if (second_socket < 0) {
-				perror("error on accept on first socket:");
-				exit(1);
-			}
-			cout << "I accepted a connection from " <<
-				inet_ntoa(client_addr.sin_addr) << endl;
-
-
-	//close(first_socket);
-	//close(second_socket);
-	child_pid = fork();
-	if (child_pid == 0) {
-		child_pid = getpid();
-		while (1) {
-
-			
-			/*
-			//Bind for new connection
-			third_socket = socket(AF_INET,SOCK_STREAM,0);
-
-		   if (third_socket<0) {
-			  perror("error opening the third socket:");
-			  exit(1);
-		   }
-		   // bind it to a port and advertise it
-		   // type is inet, port is my personal number, ANY means use my current ip number
-		   third_addr.sin_family = AF_INET;
-		   third_addr.sin_port = BOB_PORT;
-		   third_addr.sin_addr.s_addr = INADDR_ANY;
-		   bind_status = bind(third_socket,(struct sockaddr *) & third_addr,
-			  sizeof(struct sockaddr_in));
-		   if (bind_status<0) {
-			  perror("error on binding third_socket:");
-			  exit(1);
-		   }
-
-		   // inform the system how many unserved connections are allowed
-		   listen_status = listen(third_socket,MY_UNSERVED);
-		   if (listen_status<0) {
-			  perror("error on listen for third socket:");
-			  exit(1);
-		   }
-		   second_addr_len = sizeof(third_addr);
-		   // wait and accept connections
-		   cout<<"Waiting for connections"<<endl;
-
-			  memset(&third_addr, 0, sizeof(third_addr));
-			  fourth_socket = accept(third_socket, (struct sockaddr *)&third_addr,
-			  &second_addr_len);
-			  if (fourth_socket<0) {
-				 perror("error on accept on fourth socket:");
-				 exit(1);
-			  }
-
-
-
-		*/
-
-
-			cout << "Waiting For Bob's Response..." << endl;
-			while ((rcv_count = recv(first_socket, temp, SIZE, flags)) <= 0);
-			rcv_count = 0;
-			strcpy(BobInfo, temp);
-			cout << "Message 1 Bob: " << temp << endl;
-			while ((rcv_count = recv(first_socket, temp, SIZE, flags)) <= 0);
-			rcv_count = 0;
-			strcpy(BobFriends, temp);
-			cout << "Message 2 Bob: " << temp << endl;
-			// print buf
-		//cout << temp;
-		//strcpy(space,buf);
-		//strcpy(space2,buf2);
-			//cout << "Message 2: " << temp << endl;	
-		//cout << "IP Address: " << inet_ntoa(client_addr.sin_addr) << endl;
-		//cout << "Port: " << portNum << endl;
-		//cout << "Friends: " << friends << endl;
-		//space = "test";
-			cout << "Waiting for yes/no response..." << endl;
-			while ((rcv_count = recv(first_socket, temp, SIZE, flags)) <= 0);
-			rcv_count = 0;
-			cout << "Response: " << temp << endl;
-			int send_status;
-			//cout << "Enter: " << endl;
-			//cin >> space;
-			//string check = temp;
-			//if((strcmp(temp, "yes")==0) ){
-			send_status = send(first_socket, AliceInfo, strlen(AliceInfo) + 2, flags);
-			if (send_status < 0) {
-				perror("error on send\n");
-				exit(1);
-			}
-			//}
-				/*if((strcmp(temp, "yes")==0) ){
-					send_status = send(second_socket,BobInfo,strlen(BobInfo)+2,flags);
-					if (send_status<0) {
-					 perror("error on send\n");
-					 exit(1);
-				  }
-
-			}*/
-		}
-		//}
-
+	send_status = send(second_socket, AliceInfo, strlen(AliceInfo) + 2, flags);	//Send Alice's info to Bob
+	if (send_status < 0) {														//Check for errors
+		perror("error on send\n");
+		exit(1);
 	}
+
+	cout << "Waiting For Bob's Response..." << endl;							//Wait for Bob
+	while ((rcv_count = recv(second_socket, temp, SIZE, flags)) <= 0);			//Recieve Bob's information
+	rcv_count = 0;																//Reset count
+	strcpy(BobInfo, temp);														//Copy full string
+	cout << "Message 1 Bob: " << temp << endl;									//Print message for verification on server side
+
+	while ((rcv_count = recv(second_socket, temp, SIZE, flags)) <= 0);			//Recieve Bob's friends
+	rcv_count = 0;																//Reset count
+	strcpy(BobFriends, temp);													//Copy full string
+	cout << "Message 2 Bob: " << temp << endl;									//Print message for verification on server side
+
+	cout << "Waiting for yes/no response..." << endl;							//Wait for Bob's Response
+
+	while ((rcv_count = recv(second_socket, temp, SIZE, flags)) <= 0);			//Recieve response
+	rcv_count = 0;																//Reset Count
+	cout << "Response: " << temp << endl;										//Ouput response for verification on server side
+
 	return 0;
 }
