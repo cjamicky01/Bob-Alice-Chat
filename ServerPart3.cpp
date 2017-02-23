@@ -106,15 +106,15 @@ int main() {
 	first_addr.sin_family = AF_INET;											//Type is INET, port is the port entered previously, ANY means use my current IP number
 	first_addr.sin_port = MY_PORT;
 	first_addr.sin_addr.s_addr = INADDR_ANY;
-	bind_status = bind(first_socket, (struct sockaddr *) & first_addr,	//Try to connect to the server
+	bind_status = bind(first_socket, (struct sockaddr *) & first_addr,			//Try to connect to the server
 		sizeof(struct sockaddr_in));
-	if (connect_status < 0) {													//Check for errors when connecting
+	if (bind_status < 0) {														//Check for errors when binding
 		perror("error on binding first_socket:");
 		exit(1);
 	}
 
 	listen_status = listen(first_socket, MY_UNSERVED);							//Set socket to listen
-	if (listen_status < 0) {													//heck for errors when listening
+	if (listen_status < 0) {													//Check for errors when listening
 		perror("error on listen for first socket:");
 		exit(1);
 	}
