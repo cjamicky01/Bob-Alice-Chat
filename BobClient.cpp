@@ -139,7 +139,7 @@ int main(int argc, char * argv[]) {
 	***************************************************************************/
 	flags = 0;																	//Set the flags for sending information
 
-	sprintf(buf, "IP Address:%s Port Number:%d Name:%s\n", SERVICE_ADDR_STR, portNum, Name);//Convert input to proper format in buffer
+	sprintf(buf, "IP Address: %s Port Number: %d Name: %s\n", SERVICE_ADDR_STR, portNum, Name);//Convert input to proper format in buffer
 	sprintf(buf2, "%s\n", Friends);												//Convert input to proper format in buffer
 	usleep(SLEEP_TIME);															//Wait a while
 						
@@ -166,6 +166,10 @@ int main(int argc, char * argv[]) {
 	}
 
 	while ((rcv_count = recv(first_socket, space, SIZE, flags)) <= 0);			//Wait for server to reply with friends information
+	string pch;
+	pch = strtok(space, " ");
+	pch = strtok(NULL, " ");
+	cout << pch;
 	rcv_count = 0;																//reset recv cout
 	cout << space << endl;														//Output the friends information
 
@@ -177,8 +181,7 @@ int main(int argc, char * argv[]) {
 	are displayed for them and input is used for confirmation. There is also 
 	setup for this new connection to Alice.
 	***************************************************************************/
-	cout << "Please Enter the IP address to connect to: ";						//Prompt the user for the IP address
-	cin >> newAddr;																//Get the input
+													//Get the input
 	cout << "Please Enter the Port Number: ";									//Prompt the user for the port number
 	cin >> newPort;																//Get the input
 
@@ -210,7 +213,6 @@ int main(int argc, char * argv[]) {
 	while (1) {
 		cout << "What would you like to say: ";								//Prompt user for message
 		getline(cin, message);												//Gather input to send
-
 		strcpy(buf, message.c_str());										//Copy full string into buffer
 		usleep(SLEEP_TIME);													//Sleep to get more consistent behavior
 		send_status = send(second_socket, buf, strlen(buf) + 2, flags);		//send the message to Alice
